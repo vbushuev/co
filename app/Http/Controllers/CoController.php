@@ -40,15 +40,19 @@ class CoController extends Controller
         $data = $this->formatInput($rq);
         $res = [];
         $order = Order::find($data["id"]);
-        if($data["status_id"]=="4.1" && $data["payment_id"]=="1"){
+        if($data["status_id"]=="4.1"){
+            $res = $data;
+        }
+        else if($data["status_id"]=="4.3" && $data["payment_id"]=="1"){
             $res = $data;
             $order->fill([
                 "status_id"=>"4",
                 "payment_id"=>$data["payment_id"],
                 "card_id"=>$data["card_id"]
             ]);
+            $res["status_id"] = "4";
         }
-        else{//if($data["status_id"]=="4.2" ){
+        elseif($data["status_id"]=="4.2" ){
             $order->fill(["payment_id"=>$data["payment_id"],"status_id"=>"3"]);
             $user = User::find($order->user_id);
             $address = Addresses::find($order->address_id);
@@ -195,6 +199,7 @@ class CoController extends Controller
             if(isset($in["card_id"])){//user already choosen card
                 //$card = Cards::find($in["card_id"]);
                 $data["card_id"] = $in["card_id"];
+                $data["status_id"]="4.3";
             }else{
                 $cards = Cards::where("user_id",$user->id)->get();
                 if(count($cards)){ //let use choose card
